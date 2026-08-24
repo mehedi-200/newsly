@@ -22,17 +22,30 @@ class CommentsFetchFailure extends CommentsState {
 
 class CommentsCubit extends Cubit<CommentsState> {
   final StoryRepository _storyRepository;
+  final String storyId;
 
-  CommentsCubit({StoryRepository? storyRepository})
-      : _storyRepository = storyRepository ?? StoryRepository(),
-        super(CommentsInitial());
+  /// The fetch starts here rather than from a widget's build/initState, so it
+  /// happens exactly once per cubit no matter how often the screen rebuilds.
+  CommentsCubit({
+    required this.storyId,
+    StoryRepository? storyRepository,
+  })  : _storyRepository = storyRepository ?? StoryRepository(),
+        super(CommentsInitial()) {
+    getComments();
+  }
 
-  Future<void> getComments({required String storyId}) async {
+  Future<void> getComments() async {
+    //A retry can be requested from a screen that is already popping.
+    if (isClosed) return;
+
     emit(CommentsFetchInProgress());
     try {
       final comments = await _storyRepository.getComments(storyId: storyId);
+      //The user can pop the screen mid-request, which closes this cubit.
+      if (isClosed) return;
       emit(CommentsFetchSuccess(comments));
     } catch (e) {
+      if (isClosed) return;
       emit(CommentsFetchFailure(e.toString()));
     }
   }

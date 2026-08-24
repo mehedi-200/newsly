@@ -55,6 +55,8 @@ class SearchCubit extends Cubit<SearchState> {
         super(SearchInitial());
 
   Future<void> search(String query) async {
+    if (isClosed) return;
+
     final trimmed = query.trim();
     if (trimmed.isEmpty) {
       emit(SearchInitial());
@@ -96,6 +98,8 @@ class SearchCubit extends Cubit<SearchState> {
         page: current.currentPage + 1,
       );
 
+      if (isClosed) return;
+
       emit(current.copyWith(
         stories: [...current.stories, ...response.stories],
         currentPage: response.currentPage,
@@ -103,6 +107,7 @@ class SearchCubit extends Cubit<SearchState> {
         fetchMoreInProgress: false,
       ));
     } catch (e) {
+      if (isClosed) return;
       emit(current.copyWith(fetchMoreInProgress: false));
     }
   }

@@ -18,22 +18,15 @@ class StoryDetailsScreen extends StatelessWidget {
   const StoryDetailsScreen({super.key, required this.story});
 
   static Widget getRouteInstance() {
+    final story = Get.arguments as Story;
     return BlocProvider<CommentsCubit>(
-      create: (_) => CommentsCubit(),
-      child: StoryDetailsScreen(story: Get.arguments as Story),
+      create: (_) => CommentsCubit(storyId: story.id),
+      child: StoryDetailsScreen(story: story),
     );
   }
 
   @override
   Widget build(BuildContext context) {
-    //Kick the fetch off once the widget is in the tree.
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      final cubit = context.read<CommentsCubit>();
-      if (cubit.state is CommentsInitial) {
-        cubit.getComments(storyId: story.id);
-      }
-    });
-
     return Scaffold(
       appBar: AppBar(
         title: const Text("Story"),
@@ -55,7 +48,7 @@ class StoryDetailsScreen extends StatelessWidget {
           return CustomScrollView(
             slivers: [
               SliverToBoxAdapter(child: _StoryHeader(story: story)),
-              if (state is CommentsFetchInProgress)
+              if (state is CommentsFetchInProgress || state is CommentsInitial)
                 const SliverFillRemaining(
                   hasScrollBody: false,
                   child: Padding(
@@ -70,9 +63,8 @@ class StoryDetailsScreen extends StatelessWidget {
                     padding: const EdgeInsets.symmetric(vertical: 48),
                     child: ErrorContainer(
                       errorMessage: state.errorMessage,
-                      onRetry: () => context
-                          .read<CommentsCubit>()
-                          .getComments(storyId: story.id),
+                      onRetry: () =>
+                          context.read<CommentsCubit>().getComments(),
                     ),
                   ),
                 )

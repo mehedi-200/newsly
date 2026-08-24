@@ -61,10 +61,15 @@ class StoriesCubit extends Cubit<StoriesState> {
         super(StoriesInitial());
 
   Future<void> getStories() async {
+    if (isClosed) return;
+
     emit(StoriesFetchInProgress());
     try {
       final StoriesResponse response =
           await _storyRepository.getStories(feed: feed, page: 0);
+
+      //The tab can be disposed mid-request, which closes this cubit.
+      if (isClosed) return;
 
       emit(StoriesFetchSuccess(
         stories: response.stories,
@@ -72,6 +77,7 @@ class StoriesCubit extends Cubit<StoriesState> {
         hasMore: response.hasMore,
       ));
     } catch (e) {
+      if (isClosed) return;
       emit(StoriesFetchFailure(e.toString()));
     }
   }
@@ -90,6 +96,8 @@ class StoriesCubit extends Cubit<StoriesState> {
         page: current.currentPage + 1,
       );
 
+      if (isClosed) return;
+
       emit(current.copyWith(
         stories: [...current.stories, ...response.stories],
         currentPage: response.currentPage,
@@ -97,6 +105,7 @@ class StoriesCubit extends Cubit<StoriesState> {
         fetchMoreInProgress: false,
       ));
     } catch (e) {
+      if (isClosed) return;
       emit(current.copyWith(
         fetchMoreInProgress: false,
         fetchMoreFailed: true,
