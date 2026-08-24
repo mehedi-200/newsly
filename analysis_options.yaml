@@ -1,0 +1,13 @@
+# This file configures the analyzer, which statically analyzes Dart code to
+# check for errors, warnings, and lints.
+
+include: package:flutter_lints/flutter.yaml
+
+linter:
+  rules:
+    # This project uses camelCase file names (storyRepository.dart) to match
+    # the class inside them. Deliberate — keep it consistent across the repo.
+    file_names: false
+
+# Additional information about this file can be found at
+# https://dart.dev/guides/language/analysis-options
