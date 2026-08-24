@@ -44,6 +44,9 @@ app.*.map.json
 /android/app/profile
 /android/app/release
 
+# Kotlin build output
+/android/.kotlin/
+
 # iOS / CocoaPods
 /ios/Pods/
 /ios/.symlinks/
